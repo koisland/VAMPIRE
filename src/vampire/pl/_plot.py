@@ -139,14 +139,14 @@ def trackplot(
             case "heatmap":
                 data = data.filter((pl.col("chrom1") == CHROM) & 
                                 (pl.col("chrom2") == CHROM) & 
-                                (pl.col("end1") >= START) & 
-                                (pl.col("start1") <= END) &
-                                (pl.col("end2") >= START) & 
-                                (pl.col("start2") <= END))
+                                (pl.col("start1") >= START) & 
+                                (pl.col("end1") <= END) &
+                                (pl.col("start2") >= START) & 
+                                (pl.col("end2") <= END))
             case _:
                 data = data.filter((pl.col("chrom") == CHROM) & 
-                                (pl.col("end") >= START) & 
-                                (pl.col("start") <= END))
+                                (pl.col("start") >= START) & 
+                                (pl.col("end") <= END))
         if isinstance(data, pl.LazyFrame):
             data = data.collect()
 
@@ -170,6 +170,22 @@ def trackplot(
                 
             case _:
                 raise ValueError(f"Cannot identify the track type from the columns: {track.columns}")
+
+        fig.add_annotation(
+            x=0,
+            y=0.5,
+            valign="middle",
+            xref="x domain",
+            axref="x domain",
+            yref="y domain",
+            ayref="y domain",
+            xanchor="right",
+            yanchor="middle",
+            text=name,
+            showarrow=False,
+            row=track_idx + 1,
+            col=1,
+        )
         track_idx += 1
     
     # update layout: only show x-axis ticks/labels on bottom subplot
@@ -207,22 +223,6 @@ def trackplot(
         title_font_size = 16,
         title_x = (fig.layout.margin.l + (fig.layout.width - fig.layout.margin.l - fig.layout.margin.r)/2) / fig.layout.width
     )
-
-    # add annotations on the left side
-    for idx, track in enumerate(tracks):
-        y_domain = fig.layout[f"yaxis{idx+1}"].domain
-        y_center = (y_domain[0] + y_domain[1]) / 2
-
-        fig.add_annotation(
-            text=track["name"],
-            xref="paper",
-            yref="paper",
-            x=-0.07,
-            y=y_center,
-            xanchor="right",
-            yanchor="middle",
-            showarrow=False
-        )
     
     return fig
 
